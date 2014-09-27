@@ -9,6 +9,7 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
@@ -120,7 +121,7 @@ public class Dashboard {
     public void run() {
         NetworkTable.setClientMode();
          System.out.println("Set to client mode...");
-        NetworkTable.setIPAddress("10.0.0.11");
+        NetworkTable.setIPAddress("10.4.84.2");
          System.out.println("Set IP address...");
         NetworkTable dashTable = NetworkTable.getTable("SmartDashboard");
          System.out.println("Set up network tables...");
