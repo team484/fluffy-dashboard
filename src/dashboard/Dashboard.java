@@ -25,12 +25,16 @@ class DSWindow extends JComponent {
     int blobCount;
     double shootDistance;
     double gyro;
-    public DSWindow(boolean noBall, boolean ballGood, int blobCount, double shootDistance, double gyro) {
+    boolean pressure;
+    double matchTime;
+    public DSWindow(boolean noBall, boolean ballGood, int blobCount, double shootDistance, double gyro, boolean pressure, double matchTime) {
         this.noBall = noBall;
         this.ballGood = ballGood;
         this.blobCount = blobCount;
         this.shootDistance = shootDistance;
         this.gyro = gyro;
+        this.pressure = pressure;
+        this.matchTime = matchTime;
     }
     @Override
     public void paint (Graphics g) {
@@ -44,6 +48,19 @@ class DSWindow extends JComponent {
         Graphics2D g2 = (Graphics2D) g;
         g2.setColor(Color.getHSBColor((float)3.51, (float) 0.61, 1));
         g2.fillRect(0,0,windowWidth,windowHeight);
+        g2.setColor(Color.BLACK);
+        if (pressure) {
+            g2.setColor(Color.GREEN);
+        } else {
+            g2.setColor(Color.RED);
+        }
+        g2.fillRoundRect(1070, 50, 300, 300, 24, 24);
+        g2.setColor(Color.BLACK);
+        g2.drawRoundRect(1070, 50, 300, 300, 24, 24);
+        g2.scale(2,2);
+        g2.setColor(Color.WHITE);
+        g2.drawString("Compressor", 575, 100);
+        g2.scale(0.5,0.5);
         g2.drawImage(dsImage, 0, 505, null);
         //Get Ball
         String ballStatus;
@@ -89,8 +106,25 @@ class DSWindow extends JComponent {
         g2.setColor(Color.WHITE);
         g2.drawString(goodDistance, (int) (25 + (windowWidth-400)/4 - rect2.getWidth()/2), (int) (150 + 200/4 + rect2.getHeight()/2));
         g2.drawString("(Distance: " + Math.round(shootDistance) + ")", (int) (25 + (windowWidth-400)/4 - rect3.getWidth()/2), (int) (150 + 200/4 + rect3.getHeight() + 20));
+        //Match Time
+        g2.scale(0.5,0.5);
+        if (matchTime <= 10) {
+            if ((int) matchTime % 2 == 0) {
+                g2.setColor(Color.WHITE);
+            } else {
+                g2.setColor(Color.RED);
+            }
+        } else {
+            g2.setColor(Color.WHITE);
+        }
+        g2.fillRoundRect(325, 225, 400, 100, 24, 24);
+        g2.setColor(Color.BLACK);
+        g2.drawRoundRect(325, 225, 400, 100, 24, 24);
+        FontMetrics fm4 = g2.getFontMetrics();
+        Rectangle2D rect4 = fm4.getStringBounds(Math.round(matchTime * 10) / 10.0 + " Seconds", g2);
+        g2.scale(3.0, 3.0);
+        g2.drawString(Math.round(matchTime * 10) / 10.0 + " Seconds",(int) (525 - rect4.getWidth() * 1.5) / 3, 96);
         //Gyro stuff
-        g2.scale(1.0, 1.0);
         g2.translate(535, 205);
         g2.setColor(Color.DARK_GRAY);
         g2.fillRoundRect(0, 0, 150, 150, 24, 24);
@@ -135,17 +169,21 @@ public class Dashboard {
         System.out.println("Set up window...");
         double shootDistance = 0.0;
         double gyro = 0.0;
+        double matchTime = 1.0;
         boolean noBall = true;
         boolean ballGood = false;
+        boolean pressure = false;
         int blobCount = -1;
         while (true) {
+            matchTime = dashTable.getNumber("Match Time", matchTime);
+            pressure = dashTable.getBoolean("Pressure Gauge", pressure);
             noBall = dashTable.getBoolean("No Ball", noBall);
             ballGood = dashTable.getBoolean("Ball Good", ballGood);
             blobCount = Integer.parseInt(dashTable.getString("BLOB_COUNT", "-1"));
             shootDistance = dashTable.getNumber("UltraSonic", shootDistance);
             gyro = dashTable.getNumber("Gyro", (gyro + 10.0));
             window.getContentPane().removeAll();
-            window.getContentPane().add(new DSWindow(noBall, ballGood, blobCount, shootDistance, gyro));
+            window.getContentPane().add(new DSWindow(noBall, ballGood, blobCount, shootDistance, gyro, pressure, matchTime));
             window.setVisible(true);
             try {
                 Thread.sleep(100);
